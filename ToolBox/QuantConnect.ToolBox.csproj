@@ -33,7 +33,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>QuantConnect.ToolBox.OandaDownloader.Program</StartupObject>
+    <StartupObject>QuantConnect.ToolBox.YearFixToOandaDailyFormat.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EngineIoClientDotNet, Version=0.9.22.0, Culture=neutral, processorArchitecture=MSIL">
@@ -134,9 +134,11 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -207,6 +209,7 @@
     <Compile Include="YahooDownloader\Program.cs" />
     <Compile Include="YahooDownloader\YahooDataDownloader.cs" />
     <Compile Include="CsvDataProcessor.cs" />
+    <Compile Include="YearFixToOandaDailyFormat\Program.cs" />
     <Compile Include="ZipStreamProvider.cs" />
   </ItemGroup>
   <ItemGroup>

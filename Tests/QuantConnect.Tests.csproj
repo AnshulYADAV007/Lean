@@ -142,7 +142,6 @@
     <Compile Include="Common\Securities\Futures\FuturesExpiryFunctionsTests.cs" />
     <Compile Include="Common\Securities\Futures\FuturesExpiryUtilityFunctionsTests.cs" />
     <Compile Include="Common\Securities\StandardDeviationOfReturnsVolatilityModelTests.cs" />
-    <Compile Include="Common\Util\FactorFileGeneratorTests.cs" />
     <Compile Include="Common\Data\Auxiliary\LocalDiskFactorFileProviderTests.cs" />
     <Compile Include="Common\Data\Auxiliary\LocalDiskMapFileProviderTests.cs" />
     <Compile Include="Common\Data\Market\BarTests.cs" />
@@ -375,12 +374,6 @@
     <Content Include="TestData\frama.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="TestData\equity\usa\factor_files\aapl.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TestData\equity\usa\factor_files\gbsn.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="TestData\multizip.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

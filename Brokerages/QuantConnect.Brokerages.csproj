@@ -535,6 +535,7 @@
     <Compile Include="Tradier\Tokens.cs" />
     <Compile Include="Tradier\TradierBrokerageFactory.cs" />
     <Compile Include="Tradier\UserProfile.cs" />
+    <Compile Include="CryptoCompare\CryptoCompareDataQueueHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="InteractiveBrokers\IB-symbol-map.json">
@@ -575,6 +576,9 @@
     </None>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="CryptoCompare\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

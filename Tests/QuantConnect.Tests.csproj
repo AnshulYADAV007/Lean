@@ -557,11 +557,13 @@
     <None Include="TestData\spy_with_keltner.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Compile Include="Brokerages\CryptoCompare\CryptoCompareDataQueueHandlerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Adapters\" />
     <Folder Include="Tasks\" />
     <Folder Include="UserInterface\" />
+    <Folder Include="Brokerages\CryptoCompare\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Algorithm.CSharp\QuantConnect.Algorithm.CSharp.csproj">

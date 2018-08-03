@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using QuantConnect.Data;
 using QuantConnect.Interfaces;
 using QuantConnect.Packets;
+using WebSocketSharp;
+using Newtonsoft.Json;
 
 namespace QuantConnect.Brokerages.CryptoCompare
 {
@@ -17,7 +19,25 @@ namespace QuantConnect.Brokerages.CryptoCompare
         /// </summary>
         public CryptoCompareDataQueueHandler()
         {
+            var soc = new WebSocket("wss://streamer.cryptocompare.com/socket.io/?EIO=2&transport=websocket");
+            soc.OnOpen += (object sender, EventArgs e) => Console.WriteLine("Connection Opened : " + e.ToString());
+            soc.OnMessage += (object sender, MessageEventArgs e) => Console.WriteLine("New message from controller: " + e.Data);
+            soc.OnClose += (object sender, CloseEventArgs e) => Console.WriteLine("Connection Closed because: " + e.Reason);
+            soc.Connect();
+            soc.Send(MakePacket("init", new Dictionary<string, object>()
+            {
+                {"subs", new List<string> () {"0~Poloniex~BTC~USD"}}
+            }
+                               )
+                    );
+            Console.ReadKey(true);
+        }
 
+        private string MakePacket(string v, object p)
+        {
+            var result = new[] { v, p };
+
+            return "42" + JsonConvert.SerializeObject(result);
         }
 
         /// <summary>

@@ -6,19 +6,19 @@ using QuantConnect.Packets;
 using WebSocketSharp;
 using Newtonsoft.Json;
 
-namespace QuantConnect.Brokerages.CryptoCompare
+namespace QuantConnect.Brokerages.CoinAPI
 {
     /// <summary>
     /// Crypto compare data queue handler.
     /// </summary>
-    public class CryptoCompareDataQueueHandler : IDataQueueHandler
+    public class CoinAPIDataQueueHandler : IDataQueueHandler
     {
         private WebSocket socket;
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="T:QuantConnect.Brokerages.CryptoCompare.CryptoCompareDataQueueHandler"/> class.
         /// </summary>
-        public CryptoCompareDataQueueHandler()
+        public CoinAPIDataQueueHandler()
         {
             socket = new WebSocket("wss://ws.coinapi.io/v1/");
             socket.OnOpen += (object sender, EventArgs e) => Console.WriteLine("Connection Opened : " + e);
@@ -36,7 +36,7 @@ namespace QuantConnect.Brokerages.CryptoCompare
         {
             Dictionary<string, object> hello_message = new Dictionary<string, object>();
             hello_message.Add("type", "hello");
-            hello_message.Add("apikey", "36A7D135-FC0B-49D5-B987-5F86D37C3F17");
+            hello_message.Add("apikey", "");
             hello_message.Add("heartbeat", true);
             hello_message.Add("subscribe_data_type", new List<string>() { "trade" });
             hello_message.Add("subscribe_filter_symbol_id", new List<string>() {

@@ -1,19 +1,19 @@
 ﻿using System;
 using NUnit.Framework;
-using QuantConnect.Brokerages.CryptoCompare;
+using QuantConnect.Brokerages.CoinAPI;
 
-namespace QuantConnect.Tests.Brokerages.CryptoCompare
+namespace QuantConnect.Tests.Brokerages.CoinAPI
 {
     [TestFixture]
-    public class CryptoCompareDataQueueHandlerTests
+    public class CoinAPIDataQueueHandlerTests
     {
-        private CryptoCompareDataQueueHandler queue;
+        private CoinAPIDataQueueHandler queue;
         [Test]
         public void TestGetNextTick()
         {
             try
             {
-                queue = new CryptoCompareDataQueueHandler();
+                queue = new CoinAPIDataQueueHandler();
                 Assert.IsNotNull(queue);
             }
             catch (Exception e)

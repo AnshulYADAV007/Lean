@@ -136,6 +136,9 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
+    <Reference Include="websocket-sharp, Version=1.0.4.0, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSocketSharpFork.1.0.4.0\lib\net35\websocket-sharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Common\Properties\SharedAssemblyInfo.cs">
@@ -206,6 +209,7 @@
     <Compile Include="DataFeeds\Transport\LocalFileSubscriptionStreamReader.cs" />
     <Compile Include="DataFeeds\Transport\RemoteFileSubscriptionStreamReader.cs" />
     <Compile Include="DataFeeds\Transport\RestSubscriptionStreamReader.cs" />
+    <Compile Include="DataFeeds\Transport\WebSocketSubscriptionStreamReader.cs" />
     <Compile Include="DataFeeds\UniverseSelection.cs" />
     <Compile Include="DataFeeds\UpdateData.cs" />
     <Compile Include="DataFeeds\ZipDataCacheProvider.cs" />

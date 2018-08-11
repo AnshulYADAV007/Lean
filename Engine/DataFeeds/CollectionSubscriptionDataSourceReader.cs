@@ -83,6 +83,11 @@ namespace QuantConnect.Lean.Engine.DataFeeds
                         case SubscriptionTransportMedium.Rest:
                             reader = new RestSubscriptionStreamReader(source.Source, source.Headers, _isLiveMode);
                             break;
+
+                        case SubscriptionTransportMedium.WebSocket:
+                            reader = new WebSocketSubscriptionStreamReader(source.Source, source.Headers, _isLiveMode);
+                            break;
+
                         case SubscriptionTransportMedium.LocalFile:
                             reader = new LocalFileSubscriptionStreamReader(_dataCacheProvider, source.Source);
                             break;

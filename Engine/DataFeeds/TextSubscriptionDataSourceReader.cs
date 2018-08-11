@@ -132,6 +132,10 @@ namespace QuantConnect.Lean.Engine.DataFeeds
                     reader = new RestSubscriptionStreamReader(subscriptionDataSource.Source, subscriptionDataSource.Headers, _isLiveMode);
                     break;
 
+                case SubscriptionTransportMedium.WebSocket:
+                    reader = new WebSocketSubscriptionStreamReader(subscriptionDataSource.Source, subscriptionDataSource.Headers , true);
+                    break;
+
                 default:
                     throw new InvalidEnumArgumentException("Unexpected SubscriptionTransportMedium specified: " + subscriptionDataSource.TransportMedium);
             }

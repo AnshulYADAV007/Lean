@@ -14,6 +14,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Newtonsoft.Json;
 using QuantConnect.Data;
@@ -27,7 +28,7 @@ namespace QuantConnect.Algorithm.CSharp
     /// <meta name="tag" content="using data" />
     /// <meta name="tag" content="custom data" />
     /// <meta name="tag" content="crypto" />
-    public class CustomDataBitcoinAlgorithm : QCAlgorithm
+    public class CustomDataCoinAPIAlgorithm : QCAlgorithm
     {
         /// <summary>
         /// Initialise the data and resolution required, as well as the cash and start-end dates for your algorithm. All algorithms must initialized.
@@ -52,17 +53,7 @@ namespace QuantConnect.Algorithm.CSharp
         /// <param name="data">One(1) Weather Object, streamed into our algorithm synchronised in time with our other data streams</param>
         public void OnData(Bitcoin data)
         {
-            //If we don't have any weather "SHARES" -- invest"
-            if (!Portfolio.Invested)
-            {
-                //Weather used as a tradable asset, like stocks, futures etc.
-                if (data.Close != 0)
-                {
-                    Order("BTC", (Portfolio.MarginRemaining / Math.Abs(data.Close + 1)));
-                }
-                Console.WriteLine("Buying BTC 'Shares': BTC: " + data.Close);
-            }
-            Console.WriteLine("Time: " + Time.ToLongDateString() + " " + Time.ToLongTimeString() + data.Close.ToString());
+            
         }
 
         /// <summary>
@@ -110,9 +101,20 @@ namespace QuantConnect.Algorithm.CSharp
             /// <returns>String URL of source file.</returns>
             public override SubscriptionDataSource GetSource(SubscriptionDataConfig config, DateTime date, bool isLiveMode)
             {
-                 if (!isLiveMode)
+                if (isLiveMode)
                 {
-                    return new SubscriptionDataSource("https://www.bitstamp.net/api/ticker/", SubscriptionTransportMedium.Rest);
+                    Dictionary<string, object> hello_message = new Dictionary<string, object>();
+                    hello_message.Add("type", "hello");
+                    hello_message.Add("apikey", "");
+                    hello_message.Add("heartbeat", true);
+                    hello_message.Add("subscribe_data_type", new List<string>() { "trade" });
+                    hello_message.Add("subscribe_filter_symbol_id", new List<string>() {
+                        "BITSTAMP_SPOT_BTC_USD",
+                        "BITFINEX_SPOT_BTC_LTC",
+                        "COINBASE_",
+                        "ITBIT_" });
+                    string msg = JsonConvert.SerializeObject(hello_message);
+                    return new SubscriptionDataSource("wss://ws.coinapi.io/v1/", SubscriptionTransportMedium.WebSocket, FileFormat.Csv, new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(msg,"") });
                 }
 
                 //return "http://my-ftp-server.com/futures-data-" + date.ToString("Ymd") + ".zip";
@@ -133,38 +135,7 @@ namespace QuantConnect.Algorithm.CSharp
             public override BaseData Reader(SubscriptionDataConfig config, string line, DateTime date, bool isLiveMode)
             {
                 var coin = new Bitcoin();
-                if (isLiveMode)
-                {
-                    //Example Line Format:
-                    //{"high": "441.00", "last": "421.86", "timestamp": "1411606877", "bid": "421.96", "vwap": "428.58", "volume": "14120.40683975", "low": "418.83", "ask": "421.99"}
-                    try
-                    {
-                        coin = JsonConvert.DeserializeObject<Bitcoin>(line);
-                        coin.EndTime = DateTime.UtcNow.ConvertFromUtc(config.ExchangeTimeZone);
-                        coin.Value = coin.Close;
-                    }
-                    catch { /* Do nothing, possible error in json decoding */ }
-                    return coin;
-                }
-
-                //Example Line Format:
-                //Date      Open   High    Low     Close   Volume (BTC)    Volume (Currency)   Weighted Price
-                //2011-09-13 5.8    6.0     5.65    5.97    58.37138238,    346.0973893944      5.929230648356
-                try
-                {
-                    string[] data = line.Split(',');
-                    coin.Time = DateTime.Parse(data[0], CultureInfo.InvariantCulture);
-                    coin.Open = Convert.ToDecimal(data[1], CultureInfo.InvariantCulture);
-                    coin.High = Convert.ToDecimal(data[2], CultureInfo.InvariantCulture);
-                    coin.Low = Convert.ToDecimal(data[3], CultureInfo.InvariantCulture);
-                    coin.Close = Convert.ToDecimal(data[4], CultureInfo.InvariantCulture);
-                    coin.VolumeBTC = Convert.ToDecimal(data[5], CultureInfo.InvariantCulture);
-                    coin.VolumeUSD = Convert.ToDecimal(data[6], CultureInfo.InvariantCulture);
-                    coin.WeightedPrice = Convert.ToDecimal(data[7], CultureInfo.InvariantCulture);
-                    coin.Value = coin.Close;
-                }
-                catch { /* Do nothing, skip first title row */ }
-
+                Console.WriteLine(line);
                 return coin;
             }
         }

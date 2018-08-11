@@ -580,7 +580,12 @@ namespace QuantConnect
         /// <summary>
         /// The subscription's data comes from a rest call that is polled and returns a single line/data point of information
         /// </summary>
-        Rest
+        Rest,
+
+        /// <summary>
+        /// The subscription's data comes from a WebSocket based API connection. The data flow is bidirectional.
+        /// </summary>
+        WebSocket
     }
 
     /// <summary>

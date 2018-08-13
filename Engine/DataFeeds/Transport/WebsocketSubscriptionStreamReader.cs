@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using QuantConnect.Logging;
 
 namespace QuantConnect.Lean.Engine.DataFeeds.Transport
 {
@@ -29,15 +30,15 @@ namespace QuantConnect.Lean.Engine.DataFeeds.Transport
             socket.OnOpen += (object sender, EventArgs e) =>
             {
                 _isConnected = true;
-                Console.WriteLine("Connection Opened : " + e);
+                Log.Trace("Connection Opened : " + e);
             };
             socket.OnMessage += (object sender, MessageEventArgs e) =>
             {
+                Log.Trace("Incoming Message : " + e.Data);
                 messages.Enqueue(e.Data);
-                Console.WriteLine("New message from controller: " + e.Data);
             };
-            socket.OnClose += (object sender, CloseEventArgs e) => Console.WriteLine("Connection Closed because: " + e.Reason);
-            socket.OnError += (object sender, ErrorEventArgs e) => Console.WriteLine("Connection Error because: " + JsonConvert.DeserializeObject(e.Message).ToString());
+            socket.OnClose += (object sender, CloseEventArgs e) => Log.Trace("Connection Closed because: " + e.Reason);
+            socket.OnError += (object sender, ErrorEventArgs e) => Log.Trace("Connection Error because: " + JsonConvert.DeserializeObject(e.Message).ToString());
             socket.Connect();
             if (header != null)
             {
@@ -61,7 +62,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds.Transport
 
         public string ReadLine()
         {
-            return messages.Dequeue();
+            return messages.Count != 0 ? messages.Dequeue() : "no data yet";
         }
     }
 }

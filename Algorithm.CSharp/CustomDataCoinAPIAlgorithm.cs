@@ -18,6 +18,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using Newtonsoft.Json;
 using QuantConnect.Data;
+using QuantConnect.Data.Consolidators;
+using QuantConnect.Data.Market;
+using QuantConnect.Indicators;
+using QuantConnect.Securities;
+using QuantConnect;
 
 namespace QuantConnect.Algorithm.CSharp
 {
@@ -30,36 +35,52 @@ namespace QuantConnect.Algorithm.CSharp
     /// <meta name="tag" content="crypto" />
     public class CustomDataCoinAPIAlgorithm : QCAlgorithm
     {
+        private Security eth;
+        private BollingerBands bb;
+
         /// <summary>
         /// Initialise the data and resolution required, as well as the cash and start-end dates for your algorithm. All algorithms must initialized.
         /// </summary>
         public override void Initialize()
         {
             //Weather data we have is within these days:
-            SetStartDate(2011, 9, 13);
-            SetEndDate(DateTime.Now.Date.AddDays(-1));
+            SetStartDate(2018, 8, 10);
+            SetEndDate(DateTime.Now.Date);
 
             //Set the cash for the strategy:
             SetCash(100000);
 
             //Define the symbol and "type" of our generic data:
-            AddData<Bitcoin>("BTC");
+            eth = AddData<Crypto>("ETHUSD");
+            var consolidator_alt = new BaseDataConsolidator(TimeSpan.FromMinutes(60));
+            SubscriptionManager.AddConsolidator(eth.Symbol, consolidator_alt);
+            consolidator_alt.DataConsolidated += EveryConsolidatedPeriodALT;
+
+            bb = new BollingerBands(12, 1.5m, MovingAverageType.Simple);
+            RegisterIndicator(eth.Symbol, bb, consolidator_alt);
         }
 
-        /// <summary>
-        /// Event Handler for Bitcoin Data Events: These weather objects are created from our
-        /// "Weather" type below and fired into this event handler.
-        /// </summary>
-        /// <param name="data">One(1) Weather Object, streamed into our algorithm synchronised in time with our other data streams</param>
-        public void OnData(Bitcoin data)
+        public void EveryConsolidatedPeriodALT(object sender, TradeBar consolidated)
         {
-            
+            if (IsWarmingUp)
+                return;
+
+            if (consolidated.Close > bb.UpperBand)
+                Console.WriteLine("SetHoldings(eth.Symbol, 0.5m);");
+
+            if (consolidated.Close < bb.LowerBand)
+                Console.WriteLine("SetHoldings(eth.Symbol, 0.5m);");
+        }
+
+        public void OnData(Crypto data)
+        {
+            Console.WriteLine(data.ToString());
         }
 
         /// <summary>
         /// Custom Data Type: Bitcoin data from Quandl - http://www.quandl.com/help/api-for-bitcoin-data
         /// </summary>
-        public class Bitcoin : BaseData
+        public class Crypto : BaseData
         {
             [JsonProperty("timestamp")]
             public int Timestamp = 0;
@@ -85,9 +106,9 @@ namespace QuantConnect.Algorithm.CSharp
             /// 1. DEFAULT CONSTRUCTOR: Custom data types need a default constructor.
             /// We search for a default constructor so please provide one here. It won't be used for data, just to generate the "Factory".
             /// </summary>
-            public Bitcoin()
+            public Crypto()
             {
-                Symbol = "BTC";
+                Symbol = "ETHUSD";
             }
 
             /// <summary>
@@ -101,25 +122,18 @@ namespace QuantConnect.Algorithm.CSharp
             /// <returns>String URL of source file.</returns>
             public override SubscriptionDataSource GetSource(SubscriptionDataConfig config, DateTime date, bool isLiveMode)
             {
-                if (isLiveMode)
-                {
                     Dictionary<string, object> hello_message = new Dictionary<string, object>();
                     hello_message.Add("type", "hello");
-                    hello_message.Add("apikey", "");
-                    hello_message.Add("heartbeat", true);
+                    hello_message.Add("apikey", "36A7D135-FC0B-49D5-B987-5F86D37C3F17");
+                    hello_message.Add("heartbeat", false);
                     hello_message.Add("subscribe_data_type", new List<string>() { "trade" });
                     hello_message.Add("subscribe_filter_symbol_id", new List<string>() {
-                        "BITSTAMP_SPOT_BTC_USD",
-                        "BITFINEX_SPOT_BTC_LTC",
-                        "COINBASE_",
-                        "ITBIT_" });
+                        "BITFINEX_SPOT_ETH_USD",
+                        "COINBASE_SPOT_ETH_USD"
+                        });
                     string msg = JsonConvert.SerializeObject(hello_message);
                     return new SubscriptionDataSource("wss://ws.coinapi.io/v1/", SubscriptionTransportMedium.WebSocket, FileFormat.Csv, new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(msg,"") });
-                }
-
-                //return "http://my-ftp-server.com/futures-data-" + date.ToString("Ymd") + ".zip";
-                // OR simply return a fixed small data file. Large files will slow down your backtest
-                return new SubscriptionDataSource("https://www.quandl.com/api/v3/datasets/BCHARTS/BITSTAMPUSD.csv?order=asc", SubscriptionTransportMedium.RemoteFile);
+         
             }
 
             /// <summary>
@@ -134,8 +148,11 @@ namespace QuantConnect.Algorithm.CSharp
             /// <returns>New Bitcoin Object which extends BaseData.</returns>
             public override BaseData Reader(SubscriptionDataConfig config, string line, DateTime date, bool isLiveMode)
             {
-                var coin = new Bitcoin();
-                Console.WriteLine(line);
+                var coin = new Crypto();
+                if (line != "no data yet")
+                {
+                    Console.WriteLine("Reader: " + line);
+                }
                 return coin;
             }
         }

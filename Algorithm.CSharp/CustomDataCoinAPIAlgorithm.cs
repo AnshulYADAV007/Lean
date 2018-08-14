@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using QuantConnect.Data;
 using QuantConnect.Data.Consolidators;
 using QuantConnect.Data.Market;
@@ -44,7 +45,7 @@ namespace QuantConnect.Algorithm.CSharp
         public override void Initialize()
         {
             //Weather data we have is within these days:
-            SetStartDate(2018, 8, 10);
+            SetStartDate(2018, 8, 8);
             SetEndDate(DateTime.Now.Date);
 
             //Set the cash for the strategy:
@@ -80,35 +81,21 @@ namespace QuantConnect.Algorithm.CSharp
         /// <summary>
         /// Custom Data Type: Bitcoin data from Quandl - http://www.quandl.com/help/api-for-bitcoin-data
         /// </summary>
-        public class Crypto : BaseData
+        public class Crypto : Tick
         {
-            [JsonProperty("timestamp")]
-            public int Timestamp = 0;
-            [JsonProperty("open")]
-            public decimal Open = 0;
-            [JsonProperty("high")]
-            public decimal High = 0;
-            [JsonProperty("low")]
-            public decimal Low = 0;
-            [JsonProperty("last")]
-            public decimal Close = 0;
-            [JsonProperty("bid")]
-            public decimal Bid = 0;
-            [JsonProperty("ask")]
-            public decimal Ask = 0;
-            [JsonProperty("vwap")]
-            public decimal WeightedPrice = 0;
-            [JsonProperty("volume")]
-            public decimal VolumeBTC = 0;
-            public decimal VolumeUSD = 0;
+            public Crypto()
+            {
+
+            }
 
             /// <summary>
             /// 1. DEFAULT CONSTRUCTOR: Custom data types need a default constructor.
             /// We search for a default constructor so please provide one here. It won't be used for data, just to generate the "Factory".
             /// </summary>
-            public Crypto()
+            public Crypto(DateTime time, Symbol symbol, decimal price)
+                : base(time, symbol, price, price, price)
             {
-                Symbol = "ETHUSD";
+
             }
 
             /// <summary>
@@ -122,18 +109,17 @@ namespace QuantConnect.Algorithm.CSharp
             /// <returns>String URL of source file.</returns>
             public override SubscriptionDataSource GetSource(SubscriptionDataConfig config, DateTime date, bool isLiveMode)
             {
-                    Dictionary<string, object> hello_message = new Dictionary<string, object>();
-                    hello_message.Add("type", "hello");
-                    hello_message.Add("apikey", "36A7D135-FC0B-49D5-B987-5F86D37C3F17");
-                    hello_message.Add("heartbeat", false);
-                    hello_message.Add("subscribe_data_type", new List<string>() { "trade" });
-                    hello_message.Add("subscribe_filter_symbol_id", new List<string>() {
+                Dictionary<string, object> hello_message = new Dictionary<string, object>();
+                hello_message.Add("type", "hello");
+                hello_message.Add("apikey", "36A7D135-FC0B-49D5-B987-5F86D37C3F17");
+                hello_message.Add("heartbeat", false);
+                hello_message.Add("subscribe_data_type", new List<string>() { "trade" });
+                hello_message.Add("subscribe_filter_symbol_id", new List<string>() {
                         "BITFINEX_SPOT_ETH_USD",
                         "COINBASE_SPOT_ETH_USD"
                         });
-                    string msg = JsonConvert.SerializeObject(hello_message);
-                    return new SubscriptionDataSource("wss://ws.coinapi.io/v1/", SubscriptionTransportMedium.WebSocket, FileFormat.Csv, new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(msg,"") });
-         
+                string msg = JsonConvert.SerializeObject(hello_message);
+                return new SubscriptionDataSource("wss://ws.coinapi.io/v1/", SubscriptionTransportMedium.WebSocket, FileFormat.Csv, new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(msg, "") });
             }
 
             /// <summary>
@@ -148,13 +134,16 @@ namespace QuantConnect.Algorithm.CSharp
             /// <returns>New Bitcoin Object which extends BaseData.</returns>
             public override BaseData Reader(SubscriptionDataConfig config, string line, DateTime date, bool isLiveMode)
             {
-                var coin = new Crypto();
-                if (line != "no data yet")
+                if (line == null)
                 {
-                    Console.WriteLine("Reader: " + line);
+                    return null;
                 }
+                var lineData = JObject.Parse(line);
+                var price = lineData.Value<decimal>("price");
+                Crypto coin = new Crypto(lineData.Value<DateTime>("time_exchange").AddDays(-4), "ETHUSD", price);
+                //Console.WriteLine(lineData.ToString());
                 return coin;
             }
-        }
     }
+}
 }

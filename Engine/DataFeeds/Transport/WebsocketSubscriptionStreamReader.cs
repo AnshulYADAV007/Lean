@@ -30,11 +30,11 @@ namespace QuantConnect.Lean.Engine.DataFeeds.Transport
             socket.OnOpen += (object sender, EventArgs e) =>
             {
                 _isConnected = true;
-                Log.Trace("Connection Opened : " + e);
+                //Log.Trace("Connection Opened : " + e);
             };
             socket.OnMessage += (object sender, MessageEventArgs e) =>
             {
-                Log.Trace("Incoming Message : " + e.Data);
+                //Log.Trace("Incoming Message : " + e.Data);
                 messages.Enqueue(e.Data);
             };
             socket.OnClose += (object sender, CloseEventArgs e) => Log.Trace("Connection Closed because: " + e.Reason);
@@ -62,7 +62,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds.Transport
 
         public string ReadLine()
         {
-            return messages.Count != 0 ? messages.Dequeue() : "no data yet";
+            return messages.Count != 0 ? messages.Dequeue() :null;
         }
     }
 }

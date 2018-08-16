@@ -52,7 +52,7 @@ namespace QuantConnect.Algorithm.CSharp
             SetCash(100000);
 
             //Define the symbol and "type" of our generic data:
-            eth = AddData<Crypto>("ETHUSD");
+            eth = AddData<Crypto>("ETHUSD", Resolution.Tick);
             var consolidator_alt = new BaseDataConsolidator(TimeSpan.FromMinutes(60));
             SubscriptionManager.AddConsolidator(eth.Symbol, consolidator_alt);
             consolidator_alt.DataConsolidated += EveryConsolidatedPeriodALT;
@@ -73,7 +73,7 @@ namespace QuantConnect.Algorithm.CSharp
                 Console.WriteLine("SetHoldings(eth.Symbol, 0.5m);");
         }
 
-        public void OnData(Crypto data)
+        public override void OnData(Slice data)
         {
             Console.WriteLine(data.ToString());
         }

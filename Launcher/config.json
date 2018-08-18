@@ -6,10 +6,10 @@
   // two predefined environments, 'backtesting' and 'live', feel free
   // to add more!
 
-  "environment": "backtesting-desktop", // "live-paper", "backtesting", "live-interactive", "live-interactive-iqfeed"
+  "environment": "backtesting", // "live-paper", "backtesting", "live-interactive", "live-interactive-iqfeed"
 
   // algorithm class selector
-  "algorithm-type-name": "CustomDataCoinAPIAlgorithm",
+  "algorithm-type-name": "CustomDataCoinAPIAlgorithmREST",
 
   // Algorithm language selector - options CSharp, FSharp, VisualBasic, Python, Java
   "algorithm-language": "CSharp",
@@ -239,7 +239,7 @@
       "transaction-handler": "QuantConnect.Lean.Engine.TransactionHandlers.BacktestingTransactionHandler",
       "messaging-handler": "QuantConnect.Messaging.StreamingMessageHandler",
       "log-handler": "QuantConnect.Logging.QueueLogHandler",
-      "desktop-http-port": "1234",
+      "desktop-http-port": "1235",
       "desktop-exe": "../../../UserInterface/bin/Release/QuantConnect.Views.exe"
     },
 
@@ -259,7 +259,7 @@
       "transaction-handler": "QuantConnect.Lean.Engine.TransactionHandlers.BrokerageTransactionHandler",
       "messaging-handler": "QuantConnect.Messaging.StreamingMessageHandler",
       "log-handler": "QuantConnect.Logging.QueueLogHandler",
-      "desktop-http-port": "1234",
+      "desktop-http-port": "1235",
       "desktop-exe": "../../../UserInterface/bin/Release/QuantConnect.Views.exe"
     },
 

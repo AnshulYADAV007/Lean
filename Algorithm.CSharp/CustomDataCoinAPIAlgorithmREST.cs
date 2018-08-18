@@ -34,7 +34,7 @@ namespace QuantConnect.Algorithm.CSharp
     /// <meta name="tag" content="using data" />
     /// <meta name="tag" content="custom data" />
     /// <meta name="tag" content="crypto" />
-    public class CustomDataCoinAPIAlgorithm : QCAlgorithm
+    public class CustomDataCoinAPIAlgorithmREST : QCAlgorithm
     {
         private Security eth;
         private BollingerBands bb;
@@ -52,7 +52,7 @@ namespace QuantConnect.Algorithm.CSharp
             SetCash(100000);
 
             //Define the symbol and "type" of our generic data:
-            eth = AddData<Crypto>("ETHUSD", Resolution.Tick);
+            eth = AddData<Crypto>("ETHUSD");
             var consolidator_alt = new BaseDataConsolidator(TimeSpan.FromMinutes(60));
             SubscriptionManager.AddConsolidator(eth.Symbol, consolidator_alt);
             consolidator_alt.DataConsolidated += EveryConsolidatedPeriodALT;
@@ -85,21 +85,70 @@ namespace QuantConnect.Algorithm.CSharp
         /// <summary>
         /// Custom Data Type: Bitcoin data from Quandl - http://www.quandl.com/help/api-for-bitcoin-data
         /// </summary>
-        public class Crypto : Tick
+        public class Crypto : BaseData
         {
+            /*
+             *  [
+                  {
+                    "time_period_start": "2017-01-01T00:00:00.0000000Z",
+                    "time_period_end": "2017-01-02T00:00:00.0000000Z",
+                    "time_open": "2017-01-01T00:01:08.0000000Z",
+                    "time_close": "2017-01-01T23:59:46.0000000Z",
+                    "price_open": 966.340000000,
+                    "price_high": 1005.000000000,
+                    "price_low": 960.530000000,
+                    "price_close": 997.750000000,
+                    "volume_traded": 6850.593308590,
+                    "trades_count": 7815
+                  },
+                  {
+                    "time_period_start": "2017-01-02T00:00:00.0000000Z",
+                    "time_period_end": "2017-01-03T00:00:00.0000000Z",
+                    "time_open": "2017-01-02T00:00:05.0000000Z",
+                    "time_close": "2017-01-02T23:59:37.0000000Z",
+                    "price_open": 997.750000000,
+                    "price_high": 1032.000000000,
+                    "price_low": 990.010000000,
+                    "price_close": 1012.540000000,
+                    "volume_traded": 8167.381030180,
+                    "trades_count": 7871
+                  }
+                ]
+             *
+             */
+            [JsonProperty("time_period_start")]
+            public DateTime TimePeriodStart;
+            [JsonProperty("time_period_end")]
+            public DateTime TimePeriodEnd;
+            [JsonProperty("time_open")]
+            public DateTime TimeOpen;
+            [JsonProperty("time_close")]
+            public DateTime TimeClose;
+            [JsonProperty("price_open")]
+            public decimal priceOpen;
+            [JsonProperty("price_high")]
+            public decimal priceHigh;
+            [JsonProperty("price_low")]
+            public decimal priceLow;
+            [JsonProperty("price_close")]
+            public decimal priceClose;
+            [JsonProperty("volume_traded")]
+            public decimal volumeTraded;
+            [JsonProperty("trades_count")]
+            public int tradesCount;
+
+
+            private IEnumerable<Crypto> response;
+            private bool firstRead = true;
+
             public Crypto()
             {
 
             }
 
-            /// <summary>
-            /// 1. DEFAULT CONSTRUCTOR: Custom data types need a default constructor.
-            /// We search for a default constructor so please provide one here. It won't be used for data, just to generate the "Factory".
-            /// </summary>
-            public Crypto(DateTime time, Symbol symbol, decimal price)
-                : base(time, symbol, price, price, price)
+            public override string ToString()
             {
-
+                return string.Format("Time : {0} - {1} /n OHLC : {2} {3} {4} {5} Volume : {6} Count : {7}", TimeOpen, TimeClose, priceOpen, priceHigh, priceLow, priceClose, volumeTraded, tradesCount);
             }
 
             /// <summary>
@@ -113,17 +162,11 @@ namespace QuantConnect.Algorithm.CSharp
             /// <returns>String URL of source file.</returns>
             public override SubscriptionDataSource GetSource(SubscriptionDataConfig config, DateTime date, bool isLiveMode)
             {
-                Dictionary<string, object> hello_message = new Dictionary<string, object>();
-                hello_message.Add("type", "hello");
-                hello_message.Add("apikey", "36A7D135-FC0B-49D5-B987-5F86D37C3F17");
-                hello_message.Add("heartbeat", false);
-                hello_message.Add("subscribe_data_type", new List<string>() { "trade" });
-                hello_message.Add("subscribe_filter_symbol_id", new List<string>() {
-                        "BITFINEX_SPOT_ETH_USD",
-                        "COINBASE_SPOT_ETH_USD"
-                        });
-                string msg = JsonConvert.SerializeObject(hello_message);
-                return new SubscriptionDataSource("wss://ws.coinapi.io/v1/", SubscriptionTransportMedium.WebSocket, FileFormat.Csv, new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(msg, "") });
+                /*      var client = new RestClient("https://rest.coinapi.io/v1/exchanges");
+                        var request = new RestRequest(Method.GET);
+                        request.AddHeader("X-CoinAPI-Key", "73034021-0EBC-493D-8A00-E0F138111F41");
+                        IRestResponse response = client.Execute(request);*/
+                return new SubscriptionDataSource("https://rest.coinapi.io/v1/ohlcv/BITSTAMP_SPOT_BTC_USD/history?period_id=1MIN&time_start=2016-01-01T00:00:00", SubscriptionTransportMedium.Rest, FileFormat.Csv, new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("X-CoinAPI-Key", "36A7D135-FC0B-49D5-B987-5F86D37C3F17") });                
             }
 
             /// <summary>
@@ -138,16 +181,17 @@ namespace QuantConnect.Algorithm.CSharp
             /// <returns>New Bitcoin Object which extends BaseData.</returns>
             public override BaseData Reader(SubscriptionDataConfig config, string line, DateTime date, bool isLiveMode)
             {
-                if (line == null)
+                if (firstRead)
                 {
-                    return null;
+                    firstRead = false;
+                    response = JsonConvert.DeserializeObject<List<Crypto>>(line);
+                    foreach (var alt in response)
+                    {
+                        Console.WriteLine(alt.ToString());
+                    }
                 }
-                var lineData = JObject.Parse(line);
-                var price = lineData.Value<decimal>("price");
-                Crypto coin = new Crypto(lineData.Value<DateTime>("time_exchange").AddDays(-4), "ETHUSD", price);
-                //Console.WriteLine(lineData.ToString());
-                return coin;
+                return null;
             }
+        }
     }
-}
 }

@@ -34,8 +34,14 @@ namespace QuantConnect.Lean.Engine.DataFeeds.Transport
             };
             socket.OnMessage += (object sender, MessageEventArgs e) =>
             {
+                if (e.IsPing)
+                {
+                    socket.Send("PONG");
+                    return;
+                }
                 //Log.Trace("Incoming Message : " + e.Data);
                 messages.Enqueue(e.Data);
+                //Log.Trace("Incoming Messages count: " + messages.Count);
             };
             socket.OnClose += (object sender, CloseEventArgs e) => Log.Trace("Connection Closed because: " + e.Reason);
             socket.OnError += (object sender, ErrorEventArgs e) => Log.Trace("Connection Error because: " + JsonConvert.DeserializeObject(e.Message).ToString());
